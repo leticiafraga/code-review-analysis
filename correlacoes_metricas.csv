@@ -1,0 +1,9 @@
+Pergunta de Pesquisa,Métrica X,Métrica Y,Correlação,p-value
+RQ01,Tamanho do PR,Feedback Final (Merged/Closed),,
+RQ02,Tempo de Análise,Feedback Final (Merged/Closed),,
+RQ03,Descrição do PR,Feedback Final (Merged/Closed),,
+RQ04,Interações,Feedback Final (Merged/Closed),,
+RQ05,Tamanho do PR,Número de Revisões,0.18040383231686366,8.101884660137421e-05
+RQ06,Tempo de Análise,Número de Revisões,0.11773469275228896,0.010467849491729554
+RQ07,Descrição do PR,Número de Revisões,0.12476642803376413,0.00664669912057652
+RQ08,Interações,Número de Revisões,0.5867609164345993,5.284351156998484e-45

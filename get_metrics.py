@@ -4,6 +4,9 @@ from datetime import datetime
 from dotenv import load_dotenv
 import os
 
+# Carregar variáveis de ambiente
+load_dotenv()
+
 # Configuração da API
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
 GRAPHQL_ENDPOINT = 'https://api.github.com/graphql'
@@ -103,20 +106,24 @@ def get_pr_metrics(repo_owner, repo_name):
         created_at = datetime.strptime(pr['createdAt'], '%Y-%m-%dT%H:%M:%SZ')
         closed_or_merged_at = pr['closedAt'] or pr['mergedAt']
         closed_or_merged_at = datetime.strptime(closed_or_merged_at, '%Y-%m-%dT%H:%M:%SZ')
+        
+        # Calcular a duração da revisão em horas
         review_duration_hours = (closed_or_merged_at - created_at).total_seconds() / 3600
-
-        metrics.append({
-            'created_at': pr['createdAt'],
-            'closed_or_merged_at': closed_or_merged_at,
-            'reviews_count': pr['reviews']['totalCount'],
-            'review_duration_hours': review_duration_hours,
-            'additions': pr['additions'],
-            'deletions': pr['deletions'],
-            'changed_files': pr['changedFiles'],
-            'comments_count': pr['comments']['totalCount'],
-            'participants_count': pr['participants']['totalCount'],
-            'description_length': len(pr['bodyText']) if pr['bodyText'] else 0
-        })
+        
+        # Filtrar PRs cujo tempo de revisão é menor que 1 hora
+        if review_duration_hours > 1:
+            metrics.append({
+                'created_at': pr['createdAt'],
+                'closed_or_merged_at': closed_or_merged_at,
+                'reviews_count': pr['reviews']['totalCount'],
+                'review_duration_hours': review_duration_hours,
+                'additions': pr['additions'],
+                'deletions': pr['deletions'],
+                'changed_files': pr['changedFiles'],
+                'comments_count': pr['comments']['totalCount'],
+                'participants_count': pr['participants']['totalCount'],
+                'description_length': len(pr['bodyText']) if pr['bodyText'] else 0
+            })
     return metrics
 
 # Função para processar o arquivo CSV e coletar as métricas de cada repositório
