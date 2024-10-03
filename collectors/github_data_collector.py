@@ -3,6 +3,7 @@ from utils.custom_exceptions import GitHubAPIError
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from utils.utils import log_error
 from datetime import datetime
+import time
 
 class GitHubDataCollector:
     def __init__(self, token):
@@ -30,9 +31,9 @@ class GitHubDataCollector:
             log_error(f"RequestException: {e}")
             raise GitHubAPIError(status_code=response.status_code, message=str(e))
 
-    def get_repositories(self, num_repos, batch_size=3):
+    def get_repositories(self, num_repos, batch_size=1, start_cursor=None, wait_time=2):
         all_repositories = []
-        cursor = None  # Cursor inicial é None
+        cursor = start_cursor  # Iniciar com o cursor armazenado, se fornecido
 
         while len(all_repositories) < num_repos:
             # Construção da string de consulta
@@ -48,6 +49,7 @@ class GitHubDataCollector:
                         login
                     }}
                     createdAt
+                    url
                     pullRequests(states: [MERGED, CLOSED]) {{
                         totalCount
                     }}
@@ -67,18 +69,21 @@ class GitHubDataCollector:
             
             # Filtrando os repositórios de acordo com a quantidade de PRs
             for repo in result['data']['search']['nodes']:
-                if (repo['pullRequests']['totalCount'] > 100):
+                if repo['pullRequests']['totalCount'] > 100:
                     all_repositories.append(repo)
 
             page_info = result['data']['search']['pageInfo']
-            cursor = page_info['endCursor']
+            cursor = page_info['endCursor']  # Armazena o novo cursor
 
             if not page_info['hasNextPage']:
                 break  # Se não houver mais páginas, sair do loop
 
-        return all_repositories
+            time.sleep(wait_time)  # Adiciona uma pausa de espera entre os batchs
 
-    def get_pull_requests(self, repo_name, repo_owner, pull_requests_limit=100):
+        return all_repositories, cursor  # Retorna também o cursor para continuar depois
+
+
+    def get_pull_requests(self, repo_name, repo_owner, pull_requests_limit=100, wait_time=2):
         all_pull_requests = []
         cursor = None  # Cursor inicial é None
 
@@ -131,5 +136,8 @@ class GitHubDataCollector:
 
             if not page_info['hasNextPage']:
                 break
+            
+            time.sleep(wait_time)  # Adiciona uma pausa de espera entre as requisições de pull requests
 
         return all_pull_requests
+
