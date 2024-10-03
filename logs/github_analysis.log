@@ -1,0 +1,23 @@
+2024-10-03 10:37:22 DEBUG: https://api.github.com:443 "POST /graphql HTTP/1.1" 502 None
+2024-10-03 10:37:22 ERROR: Failed request with status code: 502
+2024-10-03 10:37:22 ERROR: GitHub API error: Erro na requisição para a API do GitHub. Status Code: 502
+2024-10-03 10:38:20 DEBUG: Starting new HTTPS connection (1): api.github.com:443
+2024-10-03 10:38:25 DEBUG: https://api.github.com:443 "POST /graphql HTTP/1.1" 200 None
+2024-10-03 10:38:25 DEBUG: Starting new HTTPS connection (1): api.github.com:443
+2024-10-03 10:38:27 DEBUG: https://api.github.com:443 "POST /graphql HTTP/1.1" 200 None
+2024-10-03 10:38:27 DEBUG: Starting new HTTPS connection (1): api.github.com:443
+2024-10-03 10:38:29 DEBUG: https://api.github.com:443 "POST /graphql HTTP/1.1" 200 None
+2024-10-03 10:38:29 DEBUG: Starting new HTTPS connection (1): api.github.com:443
+2024-10-03 10:38:34 DEBUG: https://api.github.com:443 "POST /graphql HTTP/1.1" 200 None
+2024-10-03 10:38:34 DEBUG: Starting new HTTPS connection (1): api.github.com:443
+2024-10-03 10:38:38 DEBUG: https://api.github.com:443 "POST /graphql HTTP/1.1" 200 None
+2024-10-03 10:38:38 DEBUG: Starting new HTTPS connection (1): api.github.com:443
+2024-10-03 10:38:42 DEBUG: https://api.github.com:443 "POST /graphql HTTP/1.1" 200 None
+2024-10-03 10:38:42 DEBUG: Starting new HTTPS connection (1): api.github.com:443
+2024-10-03 10:38:48 DEBUG: https://api.github.com:443 "POST /graphql HTTP/1.1" 200 None
+2024-10-03 10:38:48 DEBUG: Starting new HTTPS connection (1): api.github.com:443
+2024-10-03 10:38:54 DEBUG: https://api.github.com:443 "POST /graphql HTTP/1.1" 200 None
+2024-10-03 10:38:54 DEBUG: Starting new HTTPS connection (1): api.github.com:443
+2024-10-03 10:39:05 DEBUG: https://api.github.com:443 "POST /graphql HTTP/1.1" 502 None
+2024-10-03 10:39:05 ERROR: Failed request with status code: 502
+2024-10-03 10:39:05 ERROR: GitHub API error: Erro na requisição para a API do GitHub. Status Code: 502
