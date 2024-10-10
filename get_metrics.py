@@ -4,6 +4,7 @@ from datetime import datetime
 from dotenv import load_dotenv
 import os
 import concurrent.futures
+import time
 
 # Carregar variáveis de ambiente
 load_dotenv()
@@ -15,13 +16,17 @@ HEADERS = {
     'Authorization': f'Bearer {GITHUB_TOKEN}'
 }
 
-# Função para rodar a consulta GraphQL
-def run_query(query):
-    response = requests.post(GRAPHQL_ENDPOINT, json={'query': query}, headers=HEADERS)
-    if response.status_code == 200:
-        return response.json()
-    else:
-        raise Exception(f"Query failed with status code {response.status_code}: {response.text}")
+# Função para rodar a consulta GraphQL com tentativas de repetição
+def run_query(query, retries=5, delay=3):
+    for attempt in range(retries):
+        response = requests.post(GRAPHQL_ENDPOINT, json={'query': query}, headers=HEADERS)
+        if response.status_code == 200:
+            return response.json()
+        elif attempt < retries - 1:
+            print(f"Erro na consulta, tentando novamente em {delay} segundos... (Tentativa {attempt + 1}/{retries})")
+            time.sleep(delay)
+        else:
+            raise Exception(f"Query failed with status code {response.status_code}: {response.text}")
 
 # Função para coletar métricas dos PRs de um repositório com paginação
 def get_pr_metrics(repo_owner, repo_name):
@@ -34,7 +39,7 @@ def get_pr_metrics(repo_owner, repo_name):
         query = f"""
         {{
           repository(owner: "{repo_owner}", name: "{repo_name}") {{
-            pullRequests(states: [MERGED, CLOSED], first: 50, after: "{end_cursor}") {{
+            pullRequests(states: [MERGED, CLOSED], first: 20, after: "{end_cursor}") {{
               pageInfo {{
                 endCursor
                 hasNextPage
@@ -64,7 +69,7 @@ def get_pr_metrics(repo_owner, repo_name):
         """ if end_cursor else f"""
         {{
           repository(owner: "{repo_owner}", name: "{repo_name}") {{
-            pullRequests(states: [MERGED, CLOSED], first: 50) {{
+            pullRequests(states: [MERGED, CLOSED], first: 20) {{
               pageInfo {{
                 endCursor
                 hasNextPage
@@ -161,36 +166,47 @@ def process_repository(repo_url):
         return rows
     except Exception as e:
         print(f"Erro ao processar {repo_owner}/{repo_name}: {e}")
-        return []
+        return {'repo_owner': repo_owner, 'repo_name': repo_name, 'error': str(e)}
 
 # Função para processar o arquivo CSV e coletar as métricas de cada repositório com multithreading
-def process_repositories(input_csv, output_csv):
+def process_repositories(input_csv, output_csv, error_csv):
     # Ler o arquivo CSV de entrada
     df = pd.read_csv(input_csv)
 
     all_rows = []
-    with concurrent.futures.ThreadPoolExecutor(max_workers=6) as executor:
+    error_rows = []
+    with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
         futures = {executor.submit(process_repository, row['url']): row['url'] for _, row in df.iterrows()}
 
         for future in concurrent.futures.as_completed(futures):
             repo_url = futures[future]
             try:
                 rows = future.result()
-                all_rows.extend(rows)
+                if isinstance(rows, list):
+                    all_rows.extend(rows)
+                else:
+                    error_rows.append(rows)
             except Exception as e:
                 print(f"Erro ao processar {repo_url}: {e}")
+                error_rows.append({'repo_url': repo_url, 'error': str(e)})
 
     # Salvar os dados em um novo arquivo CSV
     result_df = pd.DataFrame(all_rows)
     result_df.to_csv(output_csv, index=False)
+
+    # Salvar os repositórios com erro em um arquivo CSV separado
+    error_df = pd.DataFrame(error_rows)
+    error_df.to_csv(error_csv, index=False)
 
 # Script principal
 if __name__ == "__main__":
     # Arquivo de entrada e saída
     input_csv = 'processed_data.csv'  # O arquivo com os repositórios
     output_csv = 'repositorios_com_metricas.csv'  # O arquivo onde serão salvas as métricas
+    error_csv = 'repositorios_com_erro.csv'  # O arquivo onde serão salvos os repositórios com erro
     
     # Processar repositórios e salvar métricas
-    process_repositories(input_csv, output_csv)
+    process_repositories(input_csv, output_csv, error_csv)
     
     print(f"Métricas salvas no arquivo '{output_csv}'")
+    print(f"Repositórios com erro salvos no arquivo '{error_csv}'")
