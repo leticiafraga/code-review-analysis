@@ -14,7 +14,7 @@ def generate_correlation_report(data, output_csv):
     results = []
 
     # 1. Relação entre o tamanho dos PRs e o feedback final
-    data['feedback_final'] = data['pr_closed_or_merged_at'].notnull().astype(int)  # 1 se merged, 0 se closed
+    data['feedback_final'] = data['pr_state'].apply(lambda x: 1 if x == 'MERGED' else 0)  # 1 se merged, 0 se closed
     data['tamanho'] = data['pr_additions'] + data['pr_deletions']  # Soma de adições e deleções
 
     corr, p_value = calculate_correlation(data, 'tamanho', 'feedback_final')

@@ -39,6 +39,7 @@ def get_pr_metrics(repo_owner, repo_name):
                 hasNextPage
               }}
               nodes {{
+                state
                 createdAt
                 closedAt
                 mergedAt
@@ -68,6 +69,7 @@ def get_pr_metrics(repo_owner, repo_name):
                 hasNextPage
               }}
               nodes {{
+                state
                 createdAt
                 closedAt
                 mergedAt
@@ -107,14 +109,21 @@ def get_pr_metrics(repo_owner, repo_name):
         closed_or_merged_at = pr['closedAt'] or pr['mergedAt']
         closed_or_merged_at = datetime.strptime(closed_or_merged_at, '%Y-%m-%dT%H:%M:%SZ')
         
+        # Debug: Verificar se o campo 'state' está presente
+        if 'state' not in pr:
+            print(f"Campo 'state' não encontrado no PR: {pr}")
+        else:
+            print(f"Estado do PR: {pr['state']}")
+        
         # Calcular a duração da revisão em horas
         review_duration_hours = (closed_or_merged_at - created_at).total_seconds() / 3600
         
         # Filtrar PRs cujo tempo de revisão é menor que 1 hora
         if review_duration_hours > 1:
-            metrics.append({
+            pr_metrics = {
                 'created_at': pr['createdAt'],
-                'closed_or_merged_at': closed_or_merged_at,
+                'closed_or_merged_at': pr['closedAt'] or pr['mergedAt'],
+                'state': pr['state'],
                 'reviews_count': pr['reviews']['totalCount'],
                 'review_duration_hours': review_duration_hours,
                 'additions': pr['additions'],
@@ -123,7 +132,10 @@ def get_pr_metrics(repo_owner, repo_name):
                 'comments_count': pr['comments']['totalCount'],
                 'participants_count': pr['participants']['totalCount'],
                 'description_length': len(pr['bodyText']) if pr['bodyText'] else 0
-            })
+            }
+            # Debug: Verificar se todas as métricas foram capturadas
+            print(f"Métricas do PR coletadas: {pr_metrics}")
+            metrics.append(pr_metrics)
     return metrics
 
 # Função para processar o arquivo CSV e coletar as métricas de cada repositório
@@ -148,6 +160,7 @@ def process_repositories(input_csv, output_csv):
                     'repo_owner': repo_owner,
                     'pr_created_at': pr['created_at'],
                     'pr_closed_or_merged_at': pr['closed_or_merged_at'],
+                    'pr_state': pr['state'],
                     'pr_reviews_count': pr['reviews_count'],
                     'pr_review_duration_hours': pr['review_duration_hours'],
                     'pr_additions': pr['additions'],
