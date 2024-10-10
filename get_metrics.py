@@ -3,6 +3,7 @@ import pandas as pd
 from datetime import datetime
 from dotenv import load_dotenv
 import os
+import concurrent.futures
 
 # Carregar variáveis de ambiente
 load_dotenv()
@@ -108,16 +109,10 @@ def get_pr_metrics(repo_owner, repo_name):
         created_at = datetime.strptime(pr['createdAt'], '%Y-%m-%dT%H:%M:%SZ')
         closed_or_merged_at = pr['closedAt'] or pr['mergedAt']
         closed_or_merged_at = datetime.strptime(closed_or_merged_at, '%Y-%m-%dT%H:%M:%SZ')
-        
-        # Debug: Verificar se o campo 'state' está presente
-        if 'state' not in pr:
-            print(f"Campo 'state' não encontrado no PR: {pr}")
-        else:
-            print(f"Estado do PR: {pr['state']}")
-        
+
         # Calcular a duração da revisão em horas
         review_duration_hours = (closed_or_merged_at - created_at).total_seconds() / 3600
-        
+
         # Filtrar PRs cujo tempo de revisão é menor que 1 hora
         if review_duration_hours > 1:
             pr_metrics = {
@@ -133,48 +128,60 @@ def get_pr_metrics(repo_owner, repo_name):
                 'participants_count': pr['participants']['totalCount'],
                 'description_length': len(pr['bodyText']) if pr['bodyText'] else 0
             }
-            # Debug: Verificar se todas as métricas foram capturadas
-            print(f"Métricas do PR coletadas: {pr_metrics}")
             metrics.append(pr_metrics)
     return metrics
 
-# Função para processar o arquivo CSV e coletar as métricas de cada repositório
+# Função auxiliar para processar um repositório
+def process_repository(repo_url):
+    repo_owner = repo_url.split('/')[-2]  # Extrair o owner da URL
+    repo_name = repo_url.split('/')[-1]  # Extrair o nome do repositório
+
+    print(f"Processando {repo_owner}/{repo_name}...")
+
+    # Coletar as métricas de PRs
+    try:
+        pr_metrics = get_pr_metrics(repo_owner, repo_name)
+        rows = []
+        for pr in pr_metrics:
+            rows.append({
+                'repo_name': repo_name,
+                'repo_owner': repo_owner,
+                'pr_created_at': pr['created_at'],
+                'pr_closed_or_merged_at': pr['closed_or_merged_at'],
+                'pr_state': pr['state'],
+                'pr_reviews_count': pr['reviews_count'],
+                'pr_review_duration_hours': pr['review_duration_hours'],
+                'pr_additions': pr['additions'],
+                'pr_deletions': pr['deletions'],
+                'pr_changed_files': pr['changed_files'],
+                'pr_comments_count': pr['comments_count'],
+                'pr_participants_count': pr['participants_count'],
+                'pr_description_length': pr['description_length']
+            })
+        return rows
+    except Exception as e:
+        print(f"Erro ao processar {repo_owner}/{repo_name}: {e}")
+        return []
+
+# Função para processar o arquivo CSV e coletar as métricas de cada repositório com multithreading
 def process_repositories(input_csv, output_csv):
     # Ler o arquivo CSV de entrada
     df = pd.read_csv(input_csv)
 
-    rows = []
-    for index, row in df.iterrows():
-        repo_url = row['url']
-        repo_owner = repo_url.split('/')[-2]  # Extrair o owner da URL
-        repo_name = repo_url.split('/')[-1]  # Extrair o nome do repositório
+    all_rows = []
+    with concurrent.futures.ThreadPoolExecutor(max_workers=6) as executor:
+        futures = {executor.submit(process_repository, row['url']): row['url'] for _, row in df.iterrows()}
 
-        print(f"Processando {repo_owner}/{repo_name}...")
-
-        # Coletar as métricas de PRs
-        try:
-            pr_metrics = get_pr_metrics(repo_owner, repo_name)
-            for pr in pr_metrics:
-                rows.append({
-                    'repo_name': repo_name,
-                    'repo_owner': repo_owner,
-                    'pr_created_at': pr['created_at'],
-                    'pr_closed_or_merged_at': pr['closed_or_merged_at'],
-                    'pr_state': pr['state'],
-                    'pr_reviews_count': pr['reviews_count'],
-                    'pr_review_duration_hours': pr['review_duration_hours'],
-                    'pr_additions': pr['additions'],
-                    'pr_deletions': pr['deletions'],
-                    'pr_changed_files': pr['changed_files'],
-                    'pr_comments_count': pr['comments_count'],
-                    'pr_participants_count': pr['participants_count'],
-                    'pr_description_length': pr['description_length']
-                })
-        except Exception as e:
-            print(f"Erro ao processar {repo_owner}/{repo_name}: {e}")
+        for future in concurrent.futures.as_completed(futures):
+            repo_url = futures[future]
+            try:
+                rows = future.result()
+                all_rows.extend(rows)
+            except Exception as e:
+                print(f"Erro ao processar {repo_url}: {e}")
 
     # Salvar os dados em um novo arquivo CSV
-    result_df = pd.DataFrame(rows)
+    result_df = pd.DataFrame(all_rows)
     result_df.to_csv(output_csv, index=False)
 
 # Script principal
