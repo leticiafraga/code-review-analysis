@@ -22,14 +22,14 @@ class GitHubDataCollector:
                 result = response.json()
                 if 'errors' in result:
                     log_error(f"GraphQL errors: {result['errors']}")
-                    raise GitHubAPIError(status_code=response.status_code, message="API returned errors")
+                    return
                 return result
             else:
-                log_error(f"Failed request with status code: {response.status_code}")
-                raise GitHubAPIError(status_code=response.status_code)
+                log_error(f"Failed request with status code: {response.status_code} {response.text}")
+                return
         except requests.exceptions.RequestException as e:
             log_error(f"RequestException: {e}")
-            raise GitHubAPIError(status_code=response.status_code, message=str(e))
+            return
 
     def get_repositories(self, num_repos, batch_size=1, start_cursor=None, wait_time=2):
         all_repositories = []
@@ -67,6 +67,10 @@ class GitHubDataCollector:
             """
             result = self.execute_query(query)
             
+            # Retry se os dados não tiverem sido coletados
+            if (result is None):
+                continue
+
             # Filtrando os repositórios de acordo com a quantidade de PRs
             for repo in result['data']['search']['nodes']:
                 if repo['pullRequests']['totalCount'] > 100:
