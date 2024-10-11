@@ -1,6 +1,8 @@
 
 # Análise de Code Reviews em Repositórios Populares do GitHub
 
+Daniel Leão, Juliana Serra e Letícia Fraga
+
 ## Introdução
 
 Este trabalho tem como objetivo analisar as variáveis que influenciam o merge de um pull request (PR) em repositórios populares do GitHub. Para isso, focamos em PRs que passaram por processos de revisão manual, excluindo revisões automáticas de bots e ferramentas de CI/CD. As questões de pesquisa analisam como o tamanho, o tempo de análise, a descrição e as interações nos PRs influenciam o status final e o número de revisões realizadas.
