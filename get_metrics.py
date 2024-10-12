@@ -10,36 +10,38 @@ import time
 load_dotenv()
 
 # Configuração da API
-GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
+GITHUB_TOKENS = []
 GRAPHQL_ENDPOINT = 'https://api.github.com/graphql'
-HEADERS = {
-    'Authorization': f'Bearer {GITHUB_TOKEN}'
-}
 
 # Função para rodar a consulta GraphQL com tentativas de repetição
-def run_query(query, retries=5, delay=3):
+def run_query(query, token, retries=50, delay=3):
+    headers = {
+        'Authorization': f'Bearer {token}'
+    }
     for attempt in range(retries):
-        response = requests.post(GRAPHQL_ENDPOINT, json={'query': query}, headers=HEADERS)
+        response = requests.post(GRAPHQL_ENDPOINT, json={'query': query}, headers=headers, timeout=100)
         if response.status_code == 200:
             return response.json()
         elif attempt < retries - 1:
             print(f"Erro na consulta, tentando novamente em {delay} segundos... (Tentativa {attempt + 1}/{retries})")
             time.sleep(delay)
         else:
-            raise Exception(f"Query failed with status code {response.status_code}: {response.text}")
+            print(f"Erro na consulta: {response.status_code} - {response.text}")
+            return False
 
 # Função para coletar métricas dos PRs de um repositório com paginação
 def get_pr_metrics(repo_owner, repo_name):
     has_next_page = True
     end_cursor = None
     pr_data_list = []
+    token_it = 0
 
     while has_next_page:
         # Construir a query com paginação
         query = f"""
         {{
           repository(owner: "{repo_owner}", name: "{repo_name}") {{
-            pullRequests(states: [MERGED, CLOSED], first: 20, after: "{end_cursor}") {{
+            pullRequests(states: [MERGED, CLOSED], first: 30, after: "{end_cursor}") {{
               pageInfo {{
                 endCursor
                 hasNextPage
@@ -69,7 +71,7 @@ def get_pr_metrics(repo_owner, repo_name):
         """ if end_cursor else f"""
         {{
           repository(owner: "{repo_owner}", name: "{repo_name}") {{
-            pullRequests(states: [MERGED, CLOSED], first: 20) {{
+            pullRequests(states: [MERGED, CLOSED], first: 30) {{
               pageInfo {{
                 endCursor
                 hasNextPage
@@ -97,16 +99,23 @@ def get_pr_metrics(repo_owner, repo_name):
           }}
         }}
         """
+
         # Executar a consulta
-        result = run_query(query)
+        result = run_query(query, GITHUB_TOKENS[token_it % 3])
+
+        if result == False:
+            continue
 
         # Processar os dados dos PRs
         pr_data = result['data']['repository']['pullRequests']['nodes']
         pr_data_list.extend(pr_data)
+        print(f"Coletados {len(pr_data_list)} PRs até agora")
 
         # Atualizar a paginação
         has_next_page = result['data']['repository']['pullRequests']['pageInfo']['hasNextPage']
         end_cursor = result['data']['repository']['pullRequests']['pageInfo']['endCursor']
+
+        token_it += 1
 
     # Processar as métricas dos PRs
     metrics = []
@@ -166,7 +175,7 @@ def process_repository(repo_url):
         return rows
     except Exception as e:
         print(f"Erro ao processar {repo_owner}/{repo_name}: {e}")
-        return {'repo_owner': repo_owner, 'repo_name': repo_name, 'error': str(e)}
+        return []
 
 # Função para processar o arquivo CSV e coletar as métricas de cada repositório com multithreading
 def process_repositories(input_csv, output_csv, error_csv):
@@ -175,7 +184,7 @@ def process_repositories(input_csv, output_csv, error_csv):
 
     all_rows = []
     error_rows = []
-    with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=6) as executor:
         futures = {executor.submit(process_repository, row['url']): row['url'] for _, row in df.iterrows()}
 
         for future in concurrent.futures.as_completed(futures):
