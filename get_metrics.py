@@ -10,7 +10,11 @@ import time
 load_dotenv()
 
 # Configuração da API
-GITHUB_TOKENS = []
+GITHUB_TOKENS = [
+    '',
+    '',
+    ''
+]
 GRAPHQL_ENDPOINT = 'https://api.github.com/graphql'
 
 # Função para rodar a consulta GraphQL com tentativas de repetição
@@ -211,7 +215,7 @@ def process_repositories(input_csv, output_csv, error_csv):
 if __name__ == "__main__":
     # Arquivo de entrada e saída
     input_csv = 'processed_data.csv'  # O arquivo com os repositórios
-    output_csv = 'repositorios_com_metricas.csv'  # O arquivo onde serão salvas as métricas
+    output_csv = 'repositorios_com_metricas_2.csv'  # O arquivo onde serão salvas as métricas
     error_csv = 'repositorios_com_erro.csv'  # O arquivo onde serão salvos os repositórios com erro
     
     # Processar repositórios e salvar métricas
