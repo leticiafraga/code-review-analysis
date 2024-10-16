@@ -10,7 +10,10 @@ def calculate_correlation(data, x_col, y_col, method="pearson"):
     return corr, p_value
 
 # Função para gerar as correlações e salvar em CSV
-def generate_correlation_report(data, output_csv):
+def generate_correlation_report(input_csv, output_csv):
+    # Leitura dos dados do CSV
+    data = pd.read_csv(input_csv)
+    
     results = []
 
     # 1. Relação entre o tamanho dos PRs e o feedback final
@@ -53,11 +56,13 @@ def generate_correlation_report(data, output_csv):
     results_df = pd.DataFrame(results, columns=['Pergunta de Pesquisa', 'Métrica X', 'Métrica Y', 'Correlação', 'p-value'])
     results_df.to_csv(output_csv, index=False)
 
-# Leitura dos dados do CSV
-data = pd.read_csv('repositorios_com_metricas.csv')
-
-# Gerar o relatório de correlações e salvar em CSV
-output_csv = 'correlacoes_metricas.csv'
-generate_correlation_report(data, output_csv)
-
-print(f"Relatório de correlações salvo em '{output_csv}'")
+# Script principal
+if __name__ == "__main__":
+    # Arquivo de entrada e saída
+    input_csv = 'repositorios_com_metricas.csv'  # O arquivo com os repositórios
+    output_csv = 'correlacoes_metricas.csv'  # O arquivo onde serão salvas as métricas
+    
+    # Processar repositórios e salvar métricas
+    generate_correlation_report(input_csv, output_csv)
+    
+    print(f"Relatório de correlações salvo em '{output_csv}'")
