@@ -1,7 +1,5 @@
-
-.env
 env
-/repos
+.env
 
 __pycache__/
 *.py[cod]
