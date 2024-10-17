@@ -59,8 +59,8 @@ def generate_correlation_report(input_csv, output_csv):
 # Script principal
 if __name__ == "__main__":
     # Arquivo de entrada e saída
-    input_csv = 'repositorios_com_metricas.csv'  # O arquivo com os repositórios
-    output_csv = 'correlacoes_metricas.csv'  # O arquivo onde serão salvas as métricas
+    input_csv = 'collected_data/repositorios_com_metricas.csv'  # O arquivo com os repositórios
+    output_csv = 'collected_data/correlacoes_metricas.csv'  # O arquivo onde serão salvas as métricas
     
     # Processar repositórios e salvar métricas
     generate_correlation_report(input_csv, output_csv)

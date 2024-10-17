@@ -10,11 +10,9 @@ import time
 load_dotenv()
 
 # Configuração da API
-GITHUB_TOKENS = [
-    '',
-    '',
-    ''
-]
+GITHUB_TOKENS = os.getenv("GITHUB_TOKENS").split(', ')
+GITHUB_TOKENS_LEN = len(GITHUB_TOKENS)
+
 GRAPHQL_ENDPOINT = 'https://api.github.com/graphql'
 
 # Função para rodar a consulta GraphQL com tentativas de repetição
@@ -105,7 +103,7 @@ def get_pr_metrics(repo_owner, repo_name):
         """
 
         # Executar a consulta
-        result = run_query(query, GITHUB_TOKENS[token_it % 3])
+        result = run_query(query, GITHUB_TOKENS[token_it % GITHUB_TOKENS_LEN])
 
         if result == False:
             continue
@@ -214,7 +212,7 @@ def process_repositories(input_csv, output_csv, error_csv):
 # Script principal
 if __name__ == "__main__":
     # Arquivo de entrada e saída
-    input_csv = 'processed_data.csv'  # O arquivo com os repositórios
+    input_csv = 'collected_data/top_200_repos.csv'  # O arquivo com os repositórios
     output_csv = 'repositorios_com_metricas_2.csv'  # O arquivo onde serão salvas as métricas
     error_csv = 'repositorios_com_erro.csv'  # O arquivo onde serão salvos os repositórios com erro
     

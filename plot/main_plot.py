@@ -7,7 +7,7 @@ from review_count import *
 
 
 if __name__ == "__main__":
-    dataframe = pd.read_csv("repositorios_com_metricas.csv")
+    dataframe = pd.read_csv("collected_data/repositorios_com_metricas.csv")
 
     dataframe['pr_size'] = dataframe['pr_additions'] + dataframe['pr_deletions'] + dataframe['pr_changed_files']
     dataframe['feedback'] = dataframe['pr_state'].apply(lambda x: 'MERGED' if x == 'MERGED' else 'CLOSED')
