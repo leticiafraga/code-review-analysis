@@ -212,8 +212,8 @@ def process_repositories(input_csv, output_csv, error_csv):
 # Script principal
 if __name__ == "__main__":
     # Arquivo de entrada e saída
-    input_csv = 'collected_data/top_200_repos.csv'  # O arquivo com os repositórios
-    output_csv = 'repositorios_com_metricas_2.csv'  # O arquivo onde serão salvas as métricas
+    input_csv = '../collected_data/top_200_repos.csv'  # O arquivo com os repositórios
+    output_csv = 'repositorios_com_metricas.csv'  # O arquivo onde serão salvas as métricas
     error_csv = 'repositorios_com_erro.csv'  # O arquivo onde serão salvos os repositórios com erro
     
     # Processar repositórios e salvar métricas

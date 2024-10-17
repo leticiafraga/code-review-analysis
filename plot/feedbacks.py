@@ -19,7 +19,7 @@ def pr_size_feedback(dataframe):
 
     plt.tight_layout()
 
-    plt.savefig('graphs/rq1.png')
+    plt.savefig('../graphs/rq1.png')
     plt.clf()
 
 # RQ2
@@ -36,7 +36,7 @@ def pr_analysis_duration_feedback(dataframe):
 
     plt.tight_layout()
 
-    plt.savefig('graphs/rq2.png')
+    plt.savefig('../graphs/rq2.png')
     plt.clf()
 
 # RQ3
@@ -53,7 +53,7 @@ def pr_description_feedback(dataframe):
 
     plt.tight_layout()
 
-    plt.savefig('graphs/rq3.png')
+    plt.savefig('../graphs/rq3.png')
     plt.clf()
 
 # RQ4
@@ -71,7 +71,7 @@ def pr_interactions_feedback(dataframe):
 
     plt.tight_layout()
 
-    plt.savefig('graphs/rq4.png')
+    plt.savefig('../graphs/rq4.png')
     plt.clf()
 
     # Comentários
@@ -87,7 +87,7 @@ def pr_interactions_feedback(dataframe):
 
     plt.tight_layout()
 
-    plt.savefig('graphs/rq4_comments.png')
+    plt.savefig('../graphs/rq4_comments.png')
     plt.clf()
 
     # Participantes
@@ -103,5 +103,5 @@ def pr_interactions_feedback(dataframe):
 
     plt.tight_layout()
 
-    plt.savefig('graphs/rq4_participants.png')
+    plt.savefig('../graphs/rq4_participants.png')
     plt.clf()

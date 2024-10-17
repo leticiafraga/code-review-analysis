@@ -19,7 +19,7 @@ def pr_size_review_count(dataframe):
     plt.xscale('log')
 
     plt.tight_layout()
-    plt.savefig('graphs/rq5.png')
+    plt.savefig('../graphs/rq5.png')
     plt.clf()
 
 # RQ6
@@ -36,7 +36,7 @@ def pr_analysis_duration_review_count(dataframe):
     plt.xscale('log')
     
     plt.tight_layout()
-    plt.savefig('graphs/rq6.png')
+    plt.savefig('../graphs/rq6.png')
     plt.clf()
 
 # RQ7
@@ -53,7 +53,7 @@ def pr_description_review_count(dataframe):
     plt.xscale('log')
 
     plt.tight_layout()
-    plt.savefig('graphs/rq7.png')
+    plt.savefig('../graphs/rq7.png')
     plt.clf()
 
 # RQ8
@@ -71,7 +71,7 @@ def pr_interactions_review_count(dataframe):
     plt.ylabel('Quantidade de Revisões')
 
     plt.tight_layout()
-    plt.savefig('graphs/rq8.png')
+    plt.savefig('../graphs/rq8.png')
     plt.clf()
 
     plt.figure(figsize=(15, 6))
@@ -82,7 +82,7 @@ def pr_interactions_review_count(dataframe):
     plt.ylabel('Quantidade de Revisões')
 
     plt.tight_layout()
-    plt.savefig('graphs/rq8_comments.png')
+    plt.savefig('../graphs/rq8_comments.png')
     plt.clf()
 
     plt.figure(figsize=(15, 6))
@@ -93,5 +93,5 @@ def pr_interactions_review_count(dataframe):
     plt.ylabel('Quantidade de Revisões')
 
     plt.tight_layout()
-    plt.savefig('graphs/rq8_participants.png')
+    plt.savefig('../graphs/rq8_participants.png')
     plt.clf()
