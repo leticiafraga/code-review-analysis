@@ -19,10 +19,14 @@ if __name__ == "__main__":
 
     dataframe['pr_interactions'] = dataframe['pr_participants_count'] + dataframe['pr_comments_count']
 
+    # A. Feedback Final das Revisões (Status do PR)
     pr_size_feedback(dataframe)
     pr_analysis_duration_feedback(dataframe)
     pr_description_feedback(dataframe)
     pr_interactions_feedback(dataframe)
 
+    # B. Número de Revisões
     pr_size_review_count(dataframe)
     pr_analysis_duration_review_count(dataframe)
+    pr_description_review_count(dataframe)
+    pr_interactions_review_count(dataframe)
