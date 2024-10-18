@@ -121,6 +121,9 @@ O tamanho da descrição dos PRs não parece influenciar diretamente o feedback 
 ### RQ 08: Qual a relação entre as interações nos PRs e o número de revisões realizadas?
 **Gráficos**: Três dispersões mostrando a relação entre número de participantes, comentários e interações com o número de revisões.
 ![RQ8](graphs/rq8.png)
+![RQ8](graphs/rq8_comments.png)
+![RQ8](graphs/rq8_participants.png)
+
 - **Interpretação**:  
   - Mais participantes e comentários estão associados a mais revisões.
   - A relação apresenta um limite, onde mais interações não aumentam proporcionalmente o número de revisões.  
